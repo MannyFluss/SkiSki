@@ -71,9 +71,20 @@ const G = {
 };
 
 
-
+/**
+* @typedef {{
+  * pos: Vector,
+  * vel: Vector,
+  * }} Obstacle
+  */
 let player;
 let anim; //animation default = 0, turn left = 1, turn right = 2
+
+
+/**
+* @type  { Vector []}
+*/
+let trail = []
 
 /**
 * @typedef {{
@@ -85,7 +96,10 @@ let anim; //animation default = 0, turn left = 1, turn right = 2
 * @type  { Obstacle []}
 */
 let obstacles = [];
-let speed = 1
+let speed = 1;
+
+let obstacleDelay = 60;
+let obstacleTimer = 60;
 
 
 
@@ -100,7 +114,10 @@ function update() {
   if (!ticks) {
 
     addObstacle('e')
-    player = vec(G.WIDTH/2, G.HEIGHT/3);
+    player = {
+      pos: vec(G.WIDTH/2, G.HEIGHT/3),
+      vel: vec(0.5, 1)
+    }
     anim = 0;
 
     snow = times(10, () => {
@@ -131,20 +148,37 @@ function update() {
     box(s.pos, 1);
   });
 
+  // draw trail behind
+  trail.push(vec(player.pos.x - 1, player.pos.y + 4));
+  trail.push(vec(player.pos.x + 1, player.pos.y + 4));
+  remove(trail, (tp) => {
+    tp.x -= player.vel.x;
+    tp.y -= player.vel.y;
+
+    color("light_black");
+    box(tp, 1);
+    return (tp.y < 22);
+  })
+
   //player and skis
   color("black")
+  if (player.vel.x == 0) anim = 0
+  else anim = (player.vel.x > 0) ? 2 : 1
   if(anim == 0) {
-    char("c", player.x, player.y + 3);
+    char("c", player.pos.x, player.pos.y + 3);
     } else if(anim == 1) {
-      char("d", player.x, player.y + 3);
+      char("d", player.pos.x, player.pos.y + 3);
     } else if(anim == 2) {
-      char("d", player.x, player.y + 3, {mirror: {x: -1}});
+      char("d", player.pos.x, player.pos.y + 3, {mirror: {x: -1}});
     }
-  char(addWithCharCode("a", Math.floor(ticks / 30) % 2), player);
-
- 
+  char(addWithCharCode("a", Math.floor(ticks / 30) % 2), player.pos);
 
 
+  obstacleTimer -= 1
+  if (obstacleTimer <= 0) {
+    obstacleTimer = obstacleDelay;
+    addObstacle();
+  } 
 
   //obstacles for reference
   char("e", 20, 30); //tree
@@ -159,23 +193,20 @@ function update() {
 
 function updateObstacles()
 {
-  obstacles.forEach((o)=>{
-    o.pos.y -= speed
-    console.log(o.pos.y)
+  remove(obstacles, (o)=>{
+    o.pos.y -= player.vel.y
+    o.pos.x -= player.vel.x
+    //console.log(o.pos.y)
     char(o.sprite,o.pos.x,o.pos.y)
 
     const collidePlayer = char(o.sprite,o.pos.x,o.pos.y).isColliding.char.a || char(o.sprite,o.pos.x,o.pos.y).isColliding.char.b
-    if (o.pos.y < 0)
-    {
-      obstacles.pop(o)
-    }
-  
     if (collidePlayer)
     {
       obstacleHitPlayer()
     }
 
-  })
+    return (o.pos.y < 20);
+  });
 }
 
 function obstacleHitPlayer()
