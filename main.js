@@ -61,6 +61,7 @@ LLLLLL
 `
 ];
 
+
 const G = {
   WIDTH: 75,
 	HEIGHT: 100,
@@ -69,8 +70,24 @@ const G = {
   SNOW_SPEED_MAX: 0.2,
 };
 
+
+
 let player;
 let anim; //animation default = 0, turn left = 1, turn right = 2
+
+/**
+* @typedef {{
+  * pos: Vector,
+  * sprite : String,
+  * }} Obstacle
+  */
+/**
+* @type  { Obstacle []}
+*/
+let obstacles = [];
+let speed = 1
+
+
 
 options = {
   theme: "dark",
@@ -81,6 +98,8 @@ options = {
 
 function update() {
   if (!ticks) {
+
+    addObstacle('e')
     player = vec(G.WIDTH/2, G.HEIGHT/3);
     anim = 0;
 
@@ -98,6 +117,8 @@ function update() {
       };
     });
   }
+
+
 
   //ground
   color("black");
@@ -121,15 +142,53 @@ function update() {
     }
   char(addWithCharCode("a", Math.floor(ticks / 30) % 2), player);
 
-  
+ 
+
+
+
   //obstacles for reference
   char("e", 20, 30); //tree
   char("f", 20, 40); //rock
   char("c", 61, 43); //snow
   char("g", 60, 40); //snowboarder
   
-   
+  updateObstacles();
 
+}
+
+
+function updateObstacles()
+{
+  obstacles.forEach((o)=>{
+    o.pos.y -= speed
+    console.log(o.pos.y)
+    char(o.sprite,o.pos.x,o.pos.y)
+
+    const collidePlayer = char(o.sprite,o.pos.x,o.pos.y).isColliding.char.a || char(o.sprite,o.pos.x,o.pos.y).isColliding.char.b
+    if (o.pos.y < 0)
+    {
+      obstacles.pop(o)
+    }
+  
+    if (collidePlayer)
+    {
+      obstacleHitPlayer()
+    }
+
+  })
+}
+
+function obstacleHitPlayer()
+{
+  
+}
+
+function addObstacle(_sprite = 'e')
+{
+  
+  let toAdd = {pos : vec( rnd(0,G.WIDTH) , G.HEIGHT), sprite : _sprite}
+
+  obstacles.push(toAdd)
 }
 
 addEventListener("load", onLoad);
