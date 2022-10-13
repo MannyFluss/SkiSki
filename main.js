@@ -87,6 +87,13 @@ let anim; //animation default = 0, turn left = 1, turn right = 2
 let trail = []
 
 /**
+* @type Vector
+*/
+let guideArrow;
+let turningSign = 1;
+let guideAngle = 0;
+
+/**
 * @typedef {{
   * pos: Vector,
   * sprite : String,
@@ -101,8 +108,6 @@ let speed = 1;
 let obstacleDelay = 60;
 let obstacleTimer = 60;
 
-
-
 options = {
   theme: "dark",
   isPlayingBgm: true,
@@ -115,7 +120,7 @@ function update() {
 
     addObstacle('e')
     player = {
-      pos: vec(G.WIDTH/2, G.HEIGHT/3),
+      pos: vec(G.WIDTH/2, G.HEIGHT/2),
       vel: vec(0.5, 1)
     }
     anim = 0;
@@ -134,8 +139,6 @@ function update() {
       };
     });
   }
-
-
 
   //ground
   color("black");
@@ -174,6 +177,27 @@ function update() {
   char(addWithCharCode("a", Math.floor(ticks / 30) % 2), player.pos);
 
 
+  if (input.isJustPressed) {
+    guideArrow = vec(player.vel.x, player.vel.y).normalize().mul(2);
+    
+  }
+
+  if (input.isPressed) {
+    guideArrow.rotate(turningSign * 0.1);
+    //console.log(guideArrow)
+    guideArrow.clamp(-0.80, 0.80, 0, 5);
+    color("red");
+    
+    line(player.pos, vec(player.pos.x + guideArrow.x, player.pos.y + guideArrow.y), 2);
+
+  }
+  if (input.isJustReleased){
+    player.vel = vec(guideArrow.x, guideArrow.y);
+    turningSign *= -1
+
+  }
+
+
   obstacleTimer -= 1
   if (obstacleTimer <= 0) {
     obstacleTimer = obstacleDelay;
@@ -181,10 +205,12 @@ function update() {
   } 
 
   //obstacles for reference
+  /*
   char("e", 20, 30); //tree
   char("f", 20, 40); //rock
   char("c", 61, 43); //snow
   char("g", 60, 40); //snowboarder
+  */
   
   updateObstacles();
 
@@ -197,6 +223,7 @@ function updateObstacles()
     o.pos.y -= player.vel.y
     o.pos.x -= player.vel.x
     //console.log(o.pos.y)
+    color("black");
     char(o.sprite,o.pos.x,o.pos.y)
 
     const collidePlayer = char(o.sprite,o.pos.x,o.pos.y).isColliding.char.a || char(o.sprite,o.pos.x,o.pos.y).isColliding.char.b
