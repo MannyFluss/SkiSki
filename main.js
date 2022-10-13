@@ -50,7 +50,7 @@ GGGGG
 LLLLLL
 LLLLLL
 `,
-//rival snowboarders char 'f'
+//rival snowboarders char 'g'
 `
   YY
   YY
@@ -80,18 +80,19 @@ const G = {
 let player;
 let anim; //animation default = 0, turn left = 1, turn right = 2
 
+const obsTypes = ['e', 'f', 'g'];
 
 /**
 * @type  { Vector []}
 */
-let trail = []
+let trail
 
 /**
 * @type Vector
 */
 let guideArrow;
-let turningSign = 1;
-let guideAngle = 0;
+let turningSign;
+let guideAngle;
 
 /**
 * @typedef {{
@@ -102,11 +103,11 @@ let guideAngle = 0;
 /**
 * @type  { Obstacle []}
 */
-let obstacles = [];
-let speed = 1;
+let obstacles;
+let speed;
 
-let obstacleDelay = 60;
-let obstacleTimer = 60;
+let obstacleDelay;
+let obstacleTimer;
 
 options = {
   theme: "dark",
@@ -118,12 +119,16 @@ options = {
 function update() {
   if (!ticks) {
 
-    addObstacle('e')
     player = {
       pos: vec(G.WIDTH/2, G.HEIGHT/2),
       vel: vec(0.5, 1)
     }
     anim = 0;
+    trail = [];
+    turningSign = 1;
+    obstacles = [];
+    obstacleDelay = 20
+    obstacleTimer = obstacleDelay
 
     snow = times(10, () => {
       // Random number generator function
@@ -201,7 +206,8 @@ function update() {
   obstacleTimer -= 1
   if (obstacleTimer <= 0) {
     obstacleTimer = obstacleDelay;
-    addObstacle();
+    
+    addObstacle(obsTypes[rndi(obsTypes.length)]);
   } 
 
   //obstacles for reference
@@ -238,7 +244,7 @@ function updateObstacles()
 
 function obstacleHitPlayer()
 {
-  
+  end();
 }
 
 function addObstacle(_sprite = 'e')
