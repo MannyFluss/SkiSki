@@ -186,29 +186,25 @@ function update() {
   char(addWithCharCode("a", Math.floor(ticks / 30) % 2), player.pos);
 
 
-  if (input.isJustPressed) {
-    guideArrow = vec(player.vel.x, player.vel.y).normalize().mul(G.PLAYER_SPEED);
-    
-  }
-
-  if (input.isPressed) {
-    guideArrow.rotate(turningSign * 0.09);
-    //console.log(guideArrow)
-    guideArrow.clamp(-0.75, 0.75, 0, 5);
-    color("red");
-    
-    line(player.pos, vec(player.pos.x + guideArrow.x * 10, player.pos.y + guideArrow.y * 10), 2);
-
-  }
-  if (input.isJustReleased){
-    console.log(guideArrow)
-    if (guideArrow) {
-      player.vel = vec(guideArrow.x, guideArrow.y);
+  if (ticks) {
+    if (input.isJustPressed) {
+      guideArrow = vec(player.vel.x, player.vel.y).normalize().mul(G.PLAYER_SPEED);
     }
-    turningSign *= -1;
-    play("jump", {volume:1, seed: 32});
-
+    if (input.isPressed) {
+      guideArrow.rotate(turningSign * 0.09);
+      //console.log(guideArrow)
+      guideArrow.clamp(-0.75, 0.75, 0, 5);
+      color("red");
+      line(player.pos, vec(player.pos.x + guideArrow.x * 10, player.pos.y + guideArrow.y * 10), 2);
+    }
+    if (input.isJustReleased){
+      //console.log(guideArrow)
+      player.vel = vec(guideArrow.x, guideArrow.y);
+      turningSign *= -1;
+      play("click", {volume:0.7});
+    }
   }
+  
 
 
   deltaX += player.vel.x;
@@ -220,7 +216,7 @@ function update() {
   if (obstacleTimer <= 0) {
     obstacleTimer = obstacleDelay;
     addObstacle(obsTypes[rndi(obsTypes.length)]);
-    addScore(20);
+    addScore(1);
   } 
 
   //obstacles for reference
@@ -265,9 +261,9 @@ function obstacleHitPlayer()
 
 function addObstacle(_sprite = 'e')
 {
-  
-  let toAdd = {pos : vec( rnd(0,G.WIDTH) , G.HEIGHT), sprite : _sprite}
+  let toAdd = {pos : vec( rnd(0,G.WIDTH * 2) , G.HEIGHT), sprite : _sprite}
   obstacles.push(toAdd);
+  //console.log(obstacles.length);
 }
 
 addEventListener("load", onLoad);
