@@ -68,6 +68,7 @@ const G = {
 
   SNOW_SPEED_MIN: 0.05,
   SNOW_SPEED_MAX: 0.2,
+  PLAYER_SPEED: 1
 };
 
 
@@ -80,6 +81,8 @@ const G = {
 let player;
 let anim; //animation default = 0, turn left = 1, turn right = 2
 
+// track how far left/right player has gone overall for eventual
+let deltaX;
 const obsTypes = ['e', 'f', 'g'];
 
 /**
@@ -104,10 +107,11 @@ let guideAngle;
 * @type  { Obstacle []}
 */
 let obstacles;
-let speed;
 
 let obstacleDelay;
 let obstacleTimer;
+
+let scoreTimer;
 
 options = {
   theme: "dark",
@@ -183,31 +187,43 @@ function update() {
 
 
   if (input.isJustPressed) {
-    guideArrow = vec(player.vel.x, player.vel.y).normalize().mul(2);
+    guideArrow = vec(player.vel.x, player.vel.y).normalize().mul(G.PLAYER_SPEED);
     
   }
 
   if (input.isPressed) {
-    guideArrow.rotate(turningSign * 0.1);
+    guideArrow.rotate(turningSign * 0.09);
     //console.log(guideArrow)
-    guideArrow.clamp(-0.80, 0.80, 0, 5);
+    guideArrow.clamp(-0.75, 0.75, 0, 5);
     color("red");
     
-    line(player.pos, vec(player.pos.x + guideArrow.x, player.pos.y + guideArrow.y), 2);
+    line(player.pos, vec(player.pos.x + guideArrow.x * 10, player.pos.y + guideArrow.y * 10), 2);
 
   }
   if (input.isJustReleased){
-    player.vel = vec(guideArrow.x, guideArrow.y);
-    turningSign *= -1
+    console.log(guideArrow)
+    if (guideArrow) {
+      player.vel = vec(guideArrow.x, guideArrow.y);
+    }
+    turningSign *= -1;
+    play("powerUp");
 
   }
 
 
-  obstacleTimer -= 1
+  deltaX += player.vel.x;
+  if (deltaX > 200) {
+    
+  }
+
+
+
+
+  obstacleTimer -= player.vel.y
   if (obstacleTimer <= 0) {
     obstacleTimer = obstacleDelay;
-    
     addObstacle(obsTypes[rndi(obsTypes.length)]);
+    addScore(20);
   } 
 
   //obstacles for reference
@@ -251,8 +267,7 @@ function addObstacle(_sprite = 'e')
 {
   
   let toAdd = {pos : vec( rnd(0,G.WIDTH) , G.HEIGHT), sprite : _sprite}
-
-  obstacles.push(toAdd)
+  obstacles.push(toAdd);
 }
 
 addEventListener("load", onLoad);
