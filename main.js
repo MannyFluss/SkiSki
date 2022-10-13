@@ -206,7 +206,7 @@ function update() {
       player.vel = vec(guideArrow.x, guideArrow.y);
     }
     turningSign *= -1;
-    play("powerUp");
+    play("jump", {volume:1, seed: 32});
 
   }
 
@@ -215,9 +215,6 @@ function update() {
   if (deltaX > 200) {
     
   }
-
-
-
 
   obstacleTimer -= player.vel.y
   if (obstacleTimer <= 0) {
@@ -260,7 +257,10 @@ function updateObstacles()
 
 function obstacleHitPlayer()
 {
-  end();
+  color("white");
+  box(G.WIDTH / 2, G.HEIGHT / 2 + 1, 75, 10);
+  play("explosion");
+  end("YOU CRASHED!");
 }
 
 function addObstacle(_sprite = 'e')
