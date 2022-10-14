@@ -131,7 +131,7 @@ function update() {
     trail = [];
     turningSign = 1;
     obstacles = [];
-    obstacleDelay = 20
+    obstacleDelay = 10
     obstacleTimer = obstacleDelay
 
     snow = times(10, () => {
